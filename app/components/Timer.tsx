@@ -139,7 +139,7 @@ export default function BreakSessionTimer() {
           min={1}
           value={Math.ceil(seconds / 60)}
           onChange={(e) => setSeconds(parseInt(e.target.value) *60)}
-          className="border p-1 rounded w-20 text-center"
+          className="border p-1 rounded w-20 tejxt-center"
         />
         <span>Minutes</span>
       </div>
