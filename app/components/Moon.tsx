@@ -11,6 +11,7 @@ function Moon() {
   const [lastCall, setLastCall] = usePersistState("", "TClastCall");
 
   useEffect(() => {
+    if(!lastCall)return;
     if (today !== lastCall) {
       const getMoonData = async () => {
         const data = await getMoon();

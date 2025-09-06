@@ -17,13 +17,16 @@ function ToDo() {
   const [ans, setAns] = useState("");
 
   // Reset once per day
-  useEffect(() => {
-    if (lastCall !== today) {
-      const resetGoals = goals.map(g => ({ ...g, completed: false }));
-      setGoals(resetGoals);
-      setLastCall(today);
-    }
-  }, [goals, lastCall, setGoals, setLastCall]);
+useEffect(() => {
+  if (!lastCall) return; // wait until loaded from localStorage
+
+  console.log(lastCall, today, " l t");
+  if (lastCall !== today) {
+    const resetGoals = goals.map(g => ({ ...g, completed: false }));
+    setGoals(resetGoals);
+    setLastCall(today);
+  }
+}, [goals, lastCall, today, setGoals, setLastCall]);
 
   // For adventure, ask
   const question = localStorage.getItem("state:TCques");
@@ -34,7 +37,7 @@ function ToDo() {
 
       {/* First goal with dialog */}
       <Dialog>
-        <li className="flex items-center border-2 mb-2 w-full p-2 rounded-md border-blue-300 gap-2">
+        <li className="flex  font-mono items-center border-2 mb-2 w-full p-2 rounded-md border-blue-300 gap-2">
           <DialogTrigger asChild>
             <input
               type="checkbox"
