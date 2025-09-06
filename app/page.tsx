@@ -1,12 +1,13 @@
 import Timer from "./components/Timer";
 import NearMystery from "./components/NearMystery";
-import Moon from "@/app/components/Moon";
+import ToDo from "./components/ToDo";
+import Moon from "./components/Moon";
+import IntroDialog from "./components/IntroDialog";
 
 
 
 async function Home() {
   const mapboxApiKey = process.env.MAPBOX_API_KEY;
-  console.log(mapboxApiKey, " apikey")
   try {
     const resCategory = await fetch(`https://api.mapbox.com/search/searchbox/v1/list/category?access_token=${mapboxApiKey}`);
 
@@ -29,6 +30,8 @@ async function Home() {
       <div style={{
     //    backgroundImage:  `url(clouds.jpeg)`
       }} className=" w-full flex flex-col  bg-gradient-to-tr from-sky-300 via-blue-100 to-blue-400 gap-4 items-center md:items-start  justify-center min-h-screen p-2 pb-8 gap-16 sm:p-8">
+     <IntroDialog/>
+
        <div className="bg-transparent flex md:flex-row flex-col w-full gap-8  ">
         <div className="border-2 h-fit rounded-md">
           <Timer />
@@ -43,9 +46,8 @@ async function Home() {
         </div> 
 
       <div>
-        
+        <ToDo/>
       </div>
-
 
       </div>
     );

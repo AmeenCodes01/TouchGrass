@@ -215,9 +215,9 @@ const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promis
 
             
                     </div>
-          <AlertDialogFooter>
+          {/* <AlertDialogFooter>
             <Button onClick={() => setModalOpen(false)}>Force Close (Debug)</Button>
-          </AlertDialogFooter>
+          </AlertDialogFooter> */}
         </AlertDialogContent>
       </AlertDialog>
     </div>
