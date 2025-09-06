@@ -1,8 +1,8 @@
 import { useState } from "react";
 import OpenAI from "openai";
 
-// const client = new OpenAI({apiKey:process.env.NEXT_PUBLIC_OPENAI_API_KEY,dangerouslyAllowBrowser: true });
-// console.log(process.env.NEXT_PUBLIC_OPENAI_API_KEY," openAI KEY", client)
+const client = new OpenAI({apiKey:process.env.OPENAI_API_KEY,dangerouslyAllowBrowser: true });
+console.log(process.env.OPENAI_API_KEY," openAI KEY", client)
 export function useAdventureQuestion() {
   const [question, setQuestion] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);

@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import useGetCoord from '../hooks/useGetCoord'
 import { Button } from '@/components/ui/button'
 import {
@@ -9,46 +9,51 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import usePersistState from '../hooks/usePersistState'
-import { useMapboxPlaces } from '../hooks/useMapBoxPlaces'
-import { useAdventureQuestion } from '../hooks/useAdventureQuestion'
+import fetchPlacesByCategory from '@/lib/fetchPlacesByCategory'
+import getAdvQuestion from '@/lib/getAdvQuestion'
+import { ArrowDown } from 'lucide-react'
 
 
 function NearMystery({ categories }: { categories: any }) {
 
-    const { places, loading: loadingPlaces, error: placesError, fetchPlacesByCategory } =
-    useMapboxPlaces();
-
-    const { question, loading: loadingQuestion, error: questionError, generateAdventureQuestion } =
-    useAdventureQuestion();
     const [category,setCategory]=usePersistState(null,"TCcategory")
-
+    const [question, setQuestion]=usePersistState("","TCques")
+    const [places,setPlaces]=usePersistState(null, "TCplaces")
+    const [loading,setLoading] = useState(false)
     const { coords, getLocation, error } = useGetCoord()
     useEffect(() => {
         getLocation()
     }, [])
 
     const handleAdventure = async () => {
+        setLoading(true)
     // Step 1: fetch places
-    const foundPlaces = await fetchPlacesByCategory(category.canonical_id);
-
+    const foundPlaces = await fetchPlacesByCategory(category?.canonical_id);
+        console.log(foundPlaces)
+    setPlaces(foundPlaces)
     if (foundPlaces.length > 0) {
+        //select a random place. we will check if place prev done w convex id but fr now random.
+        const selectedPlace = foundPlaces[Math.floor(Math.random() * foundPlaces.length)]
       // Step 2: generate a question for the category (or even specific place)
-      await generateAdventureQuestion(category.canonical_id);
+    const question =  await getAdvQuestion(category?.canonical_id,selectedPlace.properties.name, selectedPlace.properties.full_address );
+    console.log(question)
+    setQuestion(question)
+    setLoading(false)
     }
   };
 
     return (
-        <div className='flex flex-col gap-4 p-2'>
+        <div className='flex flex-col gap-4 p-2 max-w-[400px] w-fit justify-center items-center'>
 
-            <Button onClick={getLocation}>Get My Location</Button>
+            <Button onClick={getLocation}>{coords ? "New Location":"Get My Location"}</Button>
             {coords && <p>Lat: {coords.lat}, Lng: {coords.lng}</p>}
             {error && <p>{error}</p>}
 
             <div>
                 <DropdownMenu >
                     <DropdownMenuTrigger asChild>
-                        <Button>
-                            Choose Category
+                        <Button variant={"outline"} className='border-2'>
+                          {category ? category?.name:"  Choose Category  "} <ArrowDown/>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent>
@@ -64,17 +69,17 @@ function NearMystery({ categories }: { categories: any }) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
- <Button onClick={()=>handleAdventure()}>
-                           Generate Question
+ <Button onClick={()=>handleAdventure()} 
+    disabled={loading}
+    >
+                         {loading ?"Generating Question......" :"Generate Question" } 
                         </Button>
 
- {placesError && <p className="text-red-500">{placesError}</p>}
-      {questionError && <p className="text-red-500">{questionError}</p>}
 
 
-{question && (
-        <p className="mt-6 text-lg font-semibold">🗺️ Adventure Question: {question}</p>
-      )}
+{question && !loading && (
+        <p className="mt-6 text-md italic text-wrap font-lightbold">🗺️ Adventure Question: <br/> {question}</p>
+      )} (click below on To-do to answer)
         </div>
     )
 }

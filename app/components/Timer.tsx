@@ -15,6 +15,8 @@ import {
 
 
 import usePersistState from "../hooks/usePersistState";
+import { getSkyVerify } from "@/lib/getSkyVerify";
+import { uploadImage } from "@/lib/uploadImage";
 export default function BreakSessionTimer() {
   // ----- TIMER STATES -----
   
@@ -26,9 +28,10 @@ export default function BreakSessionTimer() {
   const [secretCode, setSecretCode] = usePersistState<string>("","BRKcode");
   const [showCode, setShowCode] = useState<boolean>(false);
   const [userCode, setUserCode] = useState<string>("");
-  const [photoSrc, setPhotoSrc] = useState<string | null>(null);
+  const [photoSrc, setPhotoSrc] = useState<string | null>(null );
   const [message, setMessage] = useState<string>("");
-
+  const [allowClose, setAllowClose]=useState(false)
+  const [loading,setLoading]=useState(false)
   // ----- TIMER LOGIC -----
   useEffect(() => {
     let timer: NodeJS.Timeout;
@@ -67,58 +70,51 @@ export default function BreakSessionTimer() {
   };
 
   // ----- IMAGE UPLOAD -----
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>): void => {
-    if (!e.target.files || e.target.files.length === 0) return;
-    const file = e.target.files[0];
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setPhotoSrc(dataUrl);
+const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>): Promise<void> => {
+  if (!e.target.files || e.target.files.length === 0) return;
+  const file = e.target.files[0];
+  try {
+    setLoading(true);
 
-      if (detectSky(dataUrl)) {
-        setMessage("🌤 Sky detected! Enter the code you wrote.");
-      } else {
-        setMessage("❌ Sky not detected, try again outside!");
-      }
-    };
-    reader.readAsDataURL(file);
-  };
+    // Upload the image and get a public URL
+    const imageUrl = await uploadImage(file);
 
-  // ----- SKY DETECTION -----
-  const detectSky = (imageSrc: string): boolean => {
-    const img = new Image();
-    img.src = imageSrc;
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return false;
-    canvas.width = 320;
-    canvas.height = 240;
-    ctx.drawImage(img, 0, 0, 320, 240);
-    const imageData = ctx.getImageData(0, 0, 320, 240);
-    const data = imageData.data;
-    let blueCount = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i],
-        g = data[i + 1],
-        b = data[i + 2];
-      if (b > 100 && b > r * 1.2 && b > g * 1.2) blueCount++;
-    }
-    const blueRatio = (blueCount / (canvas.width * canvas.height)) * 100;
-    return blueRatio > 20;
-  };
+    // For preview in UI
+    setPhotoSrc(URL.createObjectURL(file));
 
-  // ----- CODE CHECK -----
-  const checkCode = (): void => {
-    if (userCode.toUpperCase() === secretCode) {
-      setMessage("✅ Break verified! Enjoy your day outside!");
-      setModalOpen(false);
-      setPhotoSrc(null);
-      setUserCode("");
-      setIsRunning(false);
+    // Verify with OpenAI
+    const skyVerify: { sky: boolean; codeMatch: boolean } = await getSkyVerify(imageUrl, secretCode);
+
+    console.log("SkyVerify:", skyVerify);
+
+    if (skyVerify?.sky && skyVerify?.codeMatch) {
+      setMessage("🌤 Sky detected and code matched!");
+      setAllowClose(true);
     } else {
-      setMessage("❌ Code doesn't match, try again!");
+      setMessage("❌ Either no sky or code mismatch. Try again outside!");
     }
-  };
+  } catch (err) {
+    console.error("Upload/Verify failed:", err);
+    setMessage("⚠️ Something went wrong during verification.");
+  } finally {
+    setLoading(false); // ✅ Always stop spinner
+  }
+};
+
+
+  
+  // // ----- CODE CHECK -----
+  // const checkCode = (): void => {
+  //   if (userCode.toUpperCase() === secretCode) {
+  //     setMessage("✅ Break verified! Enjoy your day outside!");
+  //     setModalOpen(false);
+  //     setPhotoSrc(null);
+  //     setUserCode("");
+  //     setIsRunning(false);
+  //   } else {
+  //     setMessage("❌ Code doesn't match, try again!");
+  //   }
+  // };
 
   const minutes = Math.floor(seconds / 60);
   const displaySeconds = seconds % 60;
@@ -138,7 +134,7 @@ export default function BreakSessionTimer() {
           type="number"
           min={1}
           value={Math.ceil(seconds / 60)}
-          onChange={(e) => setSeconds(parseInt(e.target.value) *60)}
+          onChange={(e) => setSeconds(parseInt(e.target.value) *10)}
           className="border p-1 rounded w-20 tejxt-center"
         />
         <span>Minutes</span>
@@ -165,7 +161,9 @@ export default function BreakSessionTimer() {
 
             {photoSrc && <img src={photoSrc} alt="Uploaded" className="rounded-lg shadow-lg max-h-[300px]" />}
 
-            {/* {photoSrc && (
+            
+            {/* {
+            photoSrc && (
               <>
                 <input
                   type="text"
@@ -176,27 +174,49 @@ export default function BreakSessionTimer() {
                 />
                 <Button onClick={checkCode}>Submit Code</Button>
               </>
-            )}
+            )} */}
 
-            {message ? 
+            {message !=="" ? 
             <>
-            <p className="mt-2 text-center">{message}</p>
-            <Button onClick={()=>setPhotoSrc(null)}>Resubmit image</Button>
+              <p className="mt-2 text-center">{message}</p>
+           {photoSrc&& <Button onClick={()=>{setPhotoSrc(null);setMessage("")}}>Resubmit image</Button>}
             </>
             
-            :null} */}
+            :null} 
+{loading && (
+  <div className="flex items-center space-x-2">
+    <svg
+      className="animate-spin h-5 w-5 text-gray-500"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+    <span>Analysing image...</span>
+  </div>
+)}
+    
+  
+           
+                          {allowClose &&  <Button onClick={() => {  setPhotoSrc(null);setModalOpen(false);setMessage("");setAllowClose(false)}}> Close </Button>}
 
-            {
-                photoSrc ?
-                <>
-                <p>Yayyy, you went outside. You're Awesome.</p>
-                            <Button onClick={() => setModalOpen(false)}> Close </Button>
-
-                </>: null
-            }
-          </div>
+            
+                    </div>
           <AlertDialogFooter>
-            {/* <Button onClick={() => setModalOpen(false)}>Force Close (Debug)</Button> */}
+            <Button onClick={() => setModalOpen(false)}>Force Close (Debug)</Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
