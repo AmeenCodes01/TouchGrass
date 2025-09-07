@@ -12,12 +12,13 @@ import usePersistState from '../hooks/usePersistState'
 import fetchPlacesByCategory from '@/lib/fetchPlacesByCategory'
 import getAdvQuestion from '@/lib/getAdvQuestion'
 import { ArrowDown } from 'lucide-react'
+import useGrass from '../store/useGrass'
 
 
 function NearMystery({ categories }: { categories: any }) {
 
     const [category,setCategory]=usePersistState(null,"TCcategory")
-    const [question, setQuestion]=usePersistState("","TCques")
+    const {question,setQuestion}=useGrass(state=> state)
     const [places,setPlaces]=usePersistState(null, "TCplaces")
     const [loading,setLoading] = useState(false)
     const { coords, getLocation, error } = useGetCoord()
@@ -25,6 +26,9 @@ function NearMystery({ categories }: { categories: any }) {
         getLocation()
     }, [])
 
+ useEffect(() => {
+    useGrass.persist.rehydrate();
+  }, [])
     const handleAdventure = async () => {
         setLoading(true)
     // Step 1: fetch places

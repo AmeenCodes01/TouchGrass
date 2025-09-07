@@ -11,8 +11,8 @@ function Moon() {
   const [lastCall, setLastCall] = usePersistState("", "TClastCall");
 
   useEffect(() => {
-    if(!lastCall)return;
     if (today !== lastCall) {
+      
       const getMoonData = async () => {
         const data = await getMoon();
         console.log(data, "moon datas");
@@ -21,7 +21,7 @@ function Moon() {
       };
       getMoonData();
     }
-  }, []);
+  }, [lastCall,today, moonData]);
 
   if (!moonData) return <div className="p-4 text-gray-500">Loading moon info...</div>;
 

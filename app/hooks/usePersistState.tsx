@@ -1,29 +1,31 @@
-"use client"
 import { useEffect, useMemo, useState } from "react";
 
-export default function usePersistState<T>(
-  initialValue: T,
-  id: string
-): [T, React.Dispatch<React.SetStateAction<T>>] {
-  const [state, setState] = useState<T>(initialValue);
-
-  // Load from localStorage after mount (client only)
-  useEffect(() => {
+/**
+ * Custom hook that syncs a piece of state with localStorage.
+ *
+ * @param initialValue - Initial value if localStorage doesn't have a saved one.
+ * @param id - A unique key to store and retrieve state in localStorage.
+ * @returns [state, setState] tuple like useState
+ */
+export default function usePersistState<T>(initialValue: T, id: string): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const _initialValue = useMemo(() => {
     try {
       const stored = localStorage.getItem("state:" + id);
       if (stored) {
-        setState(JSON.parse(stored));
+        return JSON.parse(stored);
       }
     } catch (e) {
       console.warn("Failed to parse localStorage for:", id, e);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    return initialValue;
+  }, [id, initialValue]);
 
-  // Persist whenever state changes
+  const [state, setState] = useState<T>(_initialValue);
+
   useEffect(() => {
     try {
-      localStorage.setItem("state:" + id, JSON.stringify(state));
+      const stateStr = JSON.stringify(state);
+      localStorage.setItem("state:" + id, stateStr);
     } catch (e) {
       console.warn("Failed to save to localStorage:", id, e);
     }

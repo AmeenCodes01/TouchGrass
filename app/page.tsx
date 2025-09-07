@@ -6,7 +6,7 @@ import IntroDialog from "./components/IntroDialog";
 
 
 
-async function Home() {
+async function Page() {
   const mapboxApiKey = process.env.MAPBOX_API_KEY;
   try {
     const resCategory = await fetch(`https://api.mapbox.com/search/searchbox/v1/list/category?access_token=${mapboxApiKey}`);
@@ -59,4 +59,4 @@ async function Home() {
 
 }
 
-export default Home
+export default Page

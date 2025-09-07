@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import usePersistState from '../hooks/usePersistState'
 import { Dialog, DialogContent, DialogTrigger, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import useGrass from '../store/useGrass';
 
 const today = new Date().toISOString().split('T')[0]; // "YYYY-MM-DD"
 
@@ -15,6 +16,9 @@ function ToDo() {
 
   const [lastCall, setLastCall] = usePersistState("", "TClastGoalCall");
   const [ans, setAns] = useState("");
+  const question  = useGrass(state=>state.question)
+
+
 
   // Reset once per day
 useEffect(() => {
@@ -29,7 +33,7 @@ useEffect(() => {
 }, [goals, lastCall, today, setGoals, setLastCall]);
 
   // For adventure, ask
-  const question = localStorage.getItem("state:TCques");
+  
 
   return (
     <div>
