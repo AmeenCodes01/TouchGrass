@@ -4,7 +4,7 @@ const fetchPlacesByCategory = async (category: string, lat:number, lng:number) =
     console.log("catogory fr places : ", category)
     try {
       const res = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/category/${category}?access_token=${process.env.MAPBOX_API_KEY}&proximity=${lng},${lat}`
+        `https://api.mapbox.com/search/searchbox/v1/category/${category}?access_token=${process.env.MAPBOX_API_KEY}`
       );
 
       if (!res.ok) {

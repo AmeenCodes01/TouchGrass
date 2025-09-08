@@ -13,7 +13,7 @@ export default function useGetCoord() {
     console.log("running")
    window.navigator.geolocation.getCurrentPosition(
     
-    async  (position) => {
+      (position) => {
       console.log("running")
         console.log(position," position")
         setCoords({
