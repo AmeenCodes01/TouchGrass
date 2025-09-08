@@ -6,13 +6,15 @@ export default function useGetCoord() {
   const [error, setError] = useState<string | null>(null);
 
   const getLocation = () => {
-    if (!navigator.geolocation) {
-      setError("Geolocation is not supported by your browser");
-      return;
-    }
+    // if (!navigator.geolocation) {
+    //   setError("Geolocation is not supported by your browser");
+    //   return;
+    // }
     console.log("running")
    window.navigator.geolocation.getCurrentPosition(
+    
     async  (position) => {
+      console.log("running")
         console.log(position," position")
         setCoords({
           lat: position.coords.latitude,

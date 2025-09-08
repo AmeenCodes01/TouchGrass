@@ -26,6 +26,8 @@ function NearMystery({ categories }: { categories: any }) {
         getLocation()
     }, [])
 
+
+     console.log(coords," coords")
  useEffect(() => {
     useGrass.persist.rehydrate();
   }, [])
