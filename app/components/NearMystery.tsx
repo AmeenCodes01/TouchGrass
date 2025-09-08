@@ -31,9 +31,10 @@ function NearMystery({ categories }: { categories: any }) {
   }, [])
     const handleAdventure = async () => {
         setLoading(true)
+        
     // Step 1: fetch places
-    const foundPlaces = await fetchPlacesByCategory(category?.canonical_id);
-        console.log(foundPlaces)
+    const foundPlaces = await fetchPlacesByCategory(category?.canonical_id, coords?.lat, coords?.lng);
+        console.log(foundPlaces, " foundPlaces")
     setPlaces(foundPlaces)
     if (foundPlaces.length > 0) {
         //select a random place. we will check if place prev done w convex id but fr now random.

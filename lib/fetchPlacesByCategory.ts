@@ -1,10 +1,10 @@
 "use server"
 
-const fetchPlacesByCategory = async (category: string) => {
+const fetchPlacesByCategory = async (category: string, lat:number, lng:number) => {
     console.log("catogory fr places : ", category)
     try {
       const res = await fetch(
-        `https://api.mapbox.com/search/searchbox/v1/category/${category}?access_token=${process.env.MAPBOX_API_KEY}&proximity=-0.586195554561626,51.510734685845`
+        `https://api.mapbox.com/search/searchbox/v1/category/${category}?access_token=${process.env.MAPBOX_API_KEY}&proximity=${lng},${lat}`
       );
 
       if (!res.ok) {
